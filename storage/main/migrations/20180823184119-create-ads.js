@@ -20,8 +20,15 @@ module.exports = {
       description: {
         type: Sequelize.STRING
       },
-      ageGroup: {
-        type: Sequelize.STRING
+      catId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: { model: 'Categories', key: 'id' }
+      },
+      subcatId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: { model: 'Subcategories', key: 'id' }
       },
       views: {
         type: Sequelize.INTEGER,

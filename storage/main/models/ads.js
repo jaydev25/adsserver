@@ -47,7 +47,10 @@ module.exports = (sequelize, DataTypes) => {
   Ads.associate = function(models) {
     // associations can be defined here
     Ads.belongsTo(models.Users, {foreignKey: 'userId', targetKey: 'id'});
+    Ads.belongsTo(models.Categories, {foreignKey: 'catId', targetKey: 'id'});
+    Ads.belongsTo(models.Subcategories, {foreignKey: 'subcatId', targetKey: 'id'});
     Ads.hasMany(models.AdsMedia, {foreignKey: 'adId', sourceKey: 'id'});
+    Ads.hasMany(models.AdsFilters, {foreignKey: 'adId', sourceKey: 'id'});
   };
   return Ads;
 };
