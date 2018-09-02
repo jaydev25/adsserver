@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   Admins.associate = function(models) {
     // associations can be defined here
-    Admins.hasOne(models.Users, {as: "User"});
+    // Admins.hasOne(models.Users, { foreignKey: 'userId' });
     Admins.hasMany(models.AdminRoles, {foreignKey: 'adminId', sourceKey: 'id'});
   };
   return Admins;

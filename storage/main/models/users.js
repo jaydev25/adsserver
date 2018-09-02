@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   var Users = sequelize.define('Users', {
     id: {
@@ -25,6 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     contact: {
       type: DataTypes.STRING
     },
+    isVerified: {
+      type: DataTypes.BOOLEAN
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE
@@ -50,6 +54,11 @@ module.exports = (sequelize, DataTypes) => {
     Users.hasOne(models.Subscribers, { foreignKey: 'userId' });
     Users.hasOne(models.Admins, { foreignKey: 'userId' });
     Users.hasMany(models.Ads, {foreignKey: 'userId', sourceKey: 'id'});
+    Users.hasOne(models.VerificationToken, {
+      as: 'verificationtoken',
+      foreignKey: 'userId',
+      foreignKeyConstraint: true,
+    });
   };
   return Users;
 };

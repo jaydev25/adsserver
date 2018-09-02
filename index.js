@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const spawn = require('child_process').spawn;
 const app = express();
 const migrations = require('./storage/migration');
+const passport = require('passport');
+const session = require('express-session');
 
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(bodyParser.json())

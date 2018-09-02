@@ -57,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   Publishers.associate = function(models) {
     // associations can be defined here
-    Publishers.hasOne(models.Users, {as: "User"});
+    // Publishers.hasOne(models.Users, { foreignKey: 'userId' });
   };
   return Publishers;
 };

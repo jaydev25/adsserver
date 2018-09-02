@@ -3,9 +3,9 @@ var express = require('express')
 var db = require('../../storage/main/models/index');
 
 router.get('/', (req, res) => {
-  db.User.find().then((result) => {
+  db.Users.find().then((result) => {
     res.send(result);
   });
 })
 
-module.exports = router
+module.exports = router;
