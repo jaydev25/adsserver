@@ -3,8 +3,6 @@
 const crypto = require('crypto-random-string');
 const db = require('../../storage/main/models/index');
 const sendVerificationEmail = require('../sendverificationmail/controller');
-console.log(sendVerificationEmail);
-
 
 const SignUpController = (req, res, next) => {
   console.log(req);

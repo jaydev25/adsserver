@@ -46,6 +46,11 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING
       }
+    }).then(() => {
+      queryInterface.addConstraint('Users', ['email'], {
+        type: 'unique',
+        name: 'Publishers_unique_email'
+      });
     });
   },
   down: (queryInterface, Sequelize) => {

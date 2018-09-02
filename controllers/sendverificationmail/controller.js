@@ -1,5 +1,5 @@
 const sendGrid = require('sendgrid').mail;
-const sg = require('sendgrid')('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');
+const sg = require('sendgrid')(process.env.SEND_GRID_API_KEY);
 
 const sendVerificationEmail = (to, token) => {
     const hostUrl = process.env.hostURL;
