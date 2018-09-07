@@ -1,4 +1,5 @@
 'use strict';
+const bcrypt = require('bcrypt-nodejs');
 
 module.exports = (sequelize, DataTypes) => {
   var Users = sequelize.define('Users', {
@@ -46,7 +47,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     }
   }, {
-    timestamps: true
+    timestamps: true,
+    hooks: {
+      // beforeValidate: hashPassword
+    }
   });
   Users.associate = function(models) {
     // associations can be defined hered

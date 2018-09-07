@@ -1,26 +1,31 @@
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
-// const User = require('../app/models/user');
-const db = require('../../storage/main/models');
-const config = require('../config/main');
+'use strict';
 
-// Setup work and export for the JWT passport strategy
-module.exports = function(passport) {
-  const opts = {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: config.secret
-  };
-  passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    const jwt_user_id = jwt_payload._doc._id
-    db.Users.findById(jwt_user_id, function(err, user) {
-      if (err) {
-        return done(err, false);
-      }
-      if (user) {
-        done(null, user);
-      } else {
-        done(null, false);
-      }
-    });
-  }));
-};
+const JWTStrategy = require('passport-jwt').Strategy,
+    ExtractJwt = require('passport-jwt').ExtractJwt;
+
+const db = require('../../storage/main/models/index');
+const config = require('./' + process.env.NODE_ENV);
+
+// Hooks the JWT Strategy.
+function hookJWTStrategy(passport) {
+    var options = {};
+
+    options.secretOrKey = config.keys.secret;
+    options.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('jwt');
+    options.ignoreExpiration = false;
+
+    passport.use(new JWTStrategy(options, function(JWTPayload, callback) {
+        db.Users.findOne({ where: { email: JWTPayload.email } })
+            .then(function(user) {
+                if(!user) {
+                    callback(null, false);
+                    return;
+                }
+
+                callback(null, user);
+            });
+    }));
+}
+
+
+module.exports = hookJWTStrategy;

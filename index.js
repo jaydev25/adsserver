@@ -5,10 +5,17 @@ const bodyParser = require('body-parser')
 const app = express();
 const migrations = require('./storage/migration');
 
+
 const morgan = require('morgan');
 const passport = require('passport');
-const config = require('./controllers/config/main');
+const config = require('./controllers/config/' + process.env.NODE_ENV);
 const cors = require('cors');
+
+const hookJWTStrategy = require('./controllers/config/passport');
+app.use(passport.initialize());
+
+// Hook the passport JWT strategy.
+hookJWTStrategy(passport);
 
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(bodyParser.json())
@@ -18,7 +25,6 @@ app.use(morgan('dev'));
 app.use(require('./controllers'))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
-require('./controllers/signup')(app);
 migrations.runMigration().then(() => {
   app.listen(PORT, () => console.log(`Listening on ${ PORT }`))
 });

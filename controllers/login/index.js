@@ -1,11 +1,11 @@
 var express = require('express')
   , router = express.Router()
-var db = require('../../storage/main/models/index');
+const AuthController = require('../../middlewares/auth');
+const passport = require('passport');
 
-router.get('/', (req, res) => {
-  db.Users.find().then((result) => {
-    res.send(result);
-  });
-})
+router.post('/', AuthController.authenticateUser);
+router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
+  res.status(200).send(req.user);
+});
 
 module.exports = router;
