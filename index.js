@@ -8,10 +8,10 @@ const migrations = require('./storage/migration');
 
 const morgan = require('morgan');
 const passport = require('passport');
-const config = require('./controllers/config/' + process.env.NODE_ENV);
+const config = require('./api/config/' + process.env.NODE_ENV);
 const cors = require('cors');
 
-const hookJWTStrategy = require('./controllers/config/passport');
+const hookJWTStrategy = require('./middlewares/passport');
 app.use(passport.initialize());
 
 // Hook the passport JWT strategy.
@@ -22,7 +22,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(cors())
 app.use(morgan('dev'));
-app.use(require('./controllers'))
+app.use(require('./api'))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 migrations.runMigration().then(() => {

@@ -3,8 +3,8 @@
 const JWTStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 
-const db = require('../../storage/main/models/index');
-const config = require('./' + process.env.NODE_ENV);
+const db = require('../storage/main/models/index');
+const config = require('../api/config/' + process.env.NODE_ENV);
 
 // Hooks the JWT Strategy.
 function hookJWTStrategy(passport) {
