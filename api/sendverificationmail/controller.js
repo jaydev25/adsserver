@@ -24,8 +24,9 @@ const sendVerificationEmail = (to, token) => {
         },
         content: [
             {
-                type: 'text/plain',
-                value: `Click on this link to verify your email ${hostUrl}/verification?token=${token}&email=${to}`
+                type: 'text/html',
+                value: `Click <a href="${hostUrl}/verification?token=${token}&email=${to}">here</a> to verify your email.
+                <p>Please ignore this email if you have not registered to Ads App</p>`
             }
         ]
       }
