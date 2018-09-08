@@ -62,7 +62,11 @@ AuthController.signUp = function(req, res) {
                         }, { transaction: t }).then((result) => {
                             return sendVerificationEmail(req.body.email, result.token).then(() => {
                                 return t.commit().then(() => {
-                                    return res.status(200).json(`${req.body.email} account created successfully`);
+                                    return res.status(200).json({
+                                        success: true,
+                                        message: `${req.body.email} account created successfully`,
+                                        email: user.email
+                                    });
                                 });
                             }).catch((err) => {
                                 return t.rollback().then(() => {
@@ -106,19 +110,19 @@ AuthController.authenticateUser = function(req, res) {
 
     return Joi.validate(req.body, schema, function (err, value) {
         if (err) {
-            return res.status(422).json({
-                status: err.name,
-                data: err.details
-            });
+            return res.status(422).json(err.details[0].message);
         } else {
             const email = req.body.email,
                 password = req.body.password,
                 potentialUser = { where: { email: email } };
 
-            db.Users.findOne(potentialUser).then(function(user) {
+            return db.Users.findOne(potentialUser).then(function(user) {
                 if(!user) {
-                    res.status(404).json({ message: 'Authentication failed!' });
+                    return res.status(404).json('Authentication failed!');
                 } else {
+                    if (!user.isVerified) {
+                        return res.status(404).json('Please verify your Email!');
+                    }
                     comparePasswords(password, user.password, function(error, isMatch) {
                         if(isMatch && !error) {
                             var token = jwt.sign(
@@ -126,18 +130,18 @@ AuthController.authenticateUser = function(req, res) {
                                 config.keys.secret
                             );
 
-                            res.json({
+                            return res.json({
                                 success: true,
                                 token: 'JWT ' + token,
                                 role: user.role
                             });
                         } else {
-                            res.status(404).json({ message: 'Login failed!' });
+                            return res.status(404).json('Login failed!');
                         }
                     });
                 }
             }).catch(function(error) {
-                res.status(500).json({ message: 'There was an error!' });
+                return res.status(500).json('There was an error!');
             });
         }
     });
