@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.302.0",
-    "bcrypt-nodejs": "0.0.3",
+    "bcrypt": "0.0.3",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "crypto-random-string": "^1.0.0",
