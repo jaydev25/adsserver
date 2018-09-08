@@ -2,7 +2,7 @@ const sendGrid = require('sendgrid').mail;
 const sg = require('sendgrid')(process.env.SEND_GRID_API_KEY);
 
 const sendVerificationEmail = (to, token) => {
-    const hostUrl = process.env.hostURL;
+    const hostUrl = process.env.HOST_URL;
     const request = sg.emptyRequest({
       method: "POST",
       path: "/v3/mail/send",
