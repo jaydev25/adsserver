@@ -1,5 +1,11 @@
 'use strict';
-const bcrypt = require('bcrypt');
+if (process.env.NODE_ENV === 'development') {
+  const bcrypt = require('bcrypt-nodejs');
+} else {
+  const bcrypt = require('bcrypt');
+  const saltRounds = 10;
+  const salt = bcrypt.genSaltSync(saltRounds);
+}
 
 module.exports = (sequelize, DataTypes) => {
   var Users = sequelize.define('Users', {

@@ -2,8 +2,15 @@
 
 const jwt = require('jsonwebtoken');
 const config = require('../api/config/' + process.env.NODE_ENV);
+let bcrypt, salt;
 
-const bcrypt = require('bcrypt');
+if (process.env.NODE_ENV === 'development') {
+    bcrypt = require('bcrypt-nodejs');
+} else {
+    bcrypt = require('bcrypt');
+    const saltRounds = 10;
+    salt = bcrypt.genSaltSync(saltRounds);
+}
 const crypto = require('crypto-random-string');
 const db = require('../storage/main/models');
 const sendVerificationEmail = require('../api/sendverificationmail/controller');
@@ -15,13 +22,16 @@ var AuthController = {};
 AuthController.signUp = function(req, res) {
     const newUser = {
         email: req.body.email,
-        password: bcrypt.hashSync(req.body.password),
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         createdBy: req.body.createdBy,
         updatedBy: req.body.updatedBy,
     };
-
+    if (process.env.NODE_ENV === 'development') {
+        newUser.password = bcrypt.hashSync(req.body.password);
+    } else {
+        newUser.password = bcrypt.hashSync(req.body.password, salt);
+    }
     // Attempt to save the user
     return db.Users.findOrCreate({
         where: { email:  req.body.email },
