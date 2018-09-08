@@ -3,7 +3,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../api/config/' + process.env.NODE_ENV);
 
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt');
 const crypto = require('crypto-random-string');
 const db = require('../storage/main/models');
 const sendVerificationEmail = require('../api/sendverificationmail/controller');
