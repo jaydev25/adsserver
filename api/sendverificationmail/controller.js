@@ -1,5 +1,7 @@
 const sendGrid = require('sendgrid').mail;
 const sg = require('sendgrid')(process.env.SEND_GRID_API_KEY);
+var verifier = require('email-verify');
+      var infoCodes = verifier.infoCodes;
 
 const sendVerificationEmail = (to, token) => {
     const hostUrl = process.env.HOST_URL;
@@ -28,13 +30,24 @@ const sendVerificationEmail = (to, token) => {
         ]
       }
     });
+
     return new Promise(function (resolve, reject) {
-      sg.API(request, function (error, response) {
-        if (error) {
-          return reject(error);
+      return verifier.verify( to, function( err, info ){
+        if ( err ) {
+          console.log(err);
+          return reject(err);
         }
-        else {
-          return resolve(response);
+        else if (info.success) {
+          sg.API(request, function (error, response) {
+            if (error) {
+              console.log(error);
+            }
+          });
+          console.log( "Success (T/F): " + info.success );
+          console.log( "Info: " + info.info );
+          return resolve();
+        } else {
+          return reject(info.info);
         }
       });
     });
