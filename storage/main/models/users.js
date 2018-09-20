@@ -6,6 +6,7 @@ if (process.env.NODE_ENV === 'development') {
   const saltRounds = 10;
   const salt = bcrypt.genSaltSync(saltRounds);
 }
+const db = require('./index');
 
 module.exports = (sequelize, DataTypes) => {
   var Users = sequelize.define('Users', {
@@ -55,7 +56,26 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     timestamps: true,
     hooks: {
-      // beforeValidate: hashPassword
+      afterCreate: (user, options) => {
+        // if (options.data.accType === 'Subscriber') {
+          console.log(sequelize.models);
+          
+          return sequelize.models.Subscribers.create({
+            userId: user.id,
+            country: options.data.country,
+            state: options.data.state,
+            city: options.data.city,
+            birthDate: options.data.birthDate,
+            occupation: options.data.occupation,
+            createdBy: options.data.email,
+            updatedBy: options.data.email
+          }, {
+            transaction: options.transaction
+          }).catch((error) => {
+            console.log(error);
+          });
+        // }
+      }
     }
   });
   Users.associate = function(models) {

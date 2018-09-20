@@ -24,7 +24,14 @@ AuthController.signUp = function(req, res) {
         email: Joi.string().email({ minDomainAtoms: 2 }).required(),
         password: Joi.string().regex(/^[a-zA-Z0-9]{3,30}$/).required(),
         firstName: Joi.string().required(),
-        lastName: Joi.string().required()
+        lastName: Joi.string().required(),
+        accType: Joi.string().required(),
+        contact: Joi.string().required(),
+        country: Joi.string().required(),
+        state: Joi.string().required(),
+        city: Joi.string().required(),
+        birthDate: Joi.date().required(),
+        occupation: Joi.string().required()
     }).options({
         stripUnknown: true
     });
@@ -37,8 +44,9 @@ AuthController.signUp = function(req, res) {
                 email: req.body.email,
                 firstName: req.body.firstName,
                 lastName: req.body.lastName,
+                contact: req.body.contact,
                 createdBy: req.body.email,
-                updatedBy: req.body.email,
+                updatedBy: req.body.email
             };
             if (process.env.NODE_ENV === 'development') {
                 newUser.password = bcrypt.hashSync(req.body.password);
@@ -50,7 +58,8 @@ AuthController.signUp = function(req, res) {
                 return db.Users.findOrCreate({
                     where: { email:  req.body.email },
                     defaults: newUser,
-                    transaction: t
+                    transaction: t,
+                    data: value
                 }).spread((user, created) => {
                     // if user email already exists
                     if(!created) {
@@ -60,7 +69,7 @@ AuthController.signUp = function(req, res) {
                             userId: user.id,
                             token: crypto(16)
                         }, { transaction: t }).then((result) => {
-                            return sendVerificationEmail(req.body.email, result.token).then(() => {
+                            return sendVerificationEmail.sendVerificationEmail(req.body.email, result.token).then(() => {
                                 return t.commit().then(() => {
                                     return res.status(200).json({
                                         success: true,
@@ -69,17 +78,20 @@ AuthController.signUp = function(req, res) {
                                     });
                                 });
                             }).catch((err) => {
+                                console.log(err);
                                 return t.rollback().then(() => {
                                     return res.status(500).json(err);
                                 });
                             });
                         }).catch((error) => {
+                            console.log(error);
                             return t.rollback().then(() => {
                                 return res.status(500).json(error);
                             });
                         });
                     }
                 }).catch((error1) => {
+                    console.log(error1);
                     return t.rollback().then(() => {
                         return res.status(500).json(error1);
                     });
