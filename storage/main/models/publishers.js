@@ -36,6 +36,17 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       default: 0
     },
+    isPaymentVerified: {
+      type: DataTypes.BOOLEAN,
+      default: false
+    },
+    paymentRequestId: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    paymentId: {
+      type: DataTypes.STRING
+    },
     createdAt: {
       allowNull: false,
       type: DataTypes.DATE

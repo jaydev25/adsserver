@@ -57,24 +57,27 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     hooks: {
       afterCreate: (user, options) => {
-        // if (options.data.accType === 'Subscriber') {
+        return new Promise ((resolve, reject) => {
           console.log(sequelize.models);
-          
-          return sequelize.models.Subscribers.create({
+          return sequelize.models[options.data.accType + 's'].create({
             userId: user.id,
             country: options.data.country,
             state: options.data.state,
             city: options.data.city,
             birthDate: options.data.birthDate,
             occupation: options.data.occupation,
+            paymentRequestId: options.paymentRequestId,
             createdBy: options.data.email,
             updatedBy: options.data.email
           }, {
             transaction: options.transaction
+          }).then(() => {
+            return resolve();
           }).catch((error) => {
             console.log(error);
+            return reject(error);
           });
-        // }
+        });
       }
     }
   });
