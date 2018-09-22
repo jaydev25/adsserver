@@ -285,46 +285,43 @@ AuthController.authenticateUser = function(req, res) {
                     if (!user.isVerified) {
                         return res.status(404).json('Please verify your Email!');
                     }
-                    console.log(user.Publisher);
                     
-                    if (user.Publisher) {
-                        if (!user.Publisher.isPaymentVerified) {
-                            const payment = new Insta.PaymentData();
-                            payment.purpose = `Ads app Publisher account fees: ${user.email}`;            // REQUIRED
-                            payment.amount = 1000;                  // REQUIRED
-                            payment.phone = user.contact;                  // REQUIRED
-                            payment.buyer_name = user.firstName + ' ' + user.lastName;                  // REQUIRED
-                            // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + value.matchId;                  // REQUIRED
-                            // payment.send_email = 9;                  // REQUIRED
-                            payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${user.email}`;                 // REQUIRED
-                            // payment.send_sms = 9;                  // REQUIRED
-                            payment.email = user.email;                  // REQUIRED
-                            payment.allow_repeated_payments = false;                  // REQUIRED
-                            // payment.setRedirectUrl(REDIRECT_URL);
-                            Insta.isSandboxMode(true);
-                            Insta.createPayment(payment, function(error, response) {
-                                if (error) {
-                                    // some error
-                                    console.log(error);
-                                    return res.status(500).json(error);
-                                } else {
-                                    const paymentRequest = JSON.parse(response);
-                                    console.log(paymentRequest);
-                                    user.Publisher.paymentRequestId = paymentRequest.payment_request.id;
-                                    user.Publisher.save().then(() => {
-                                        return res.status(200).json({
-                                            needPayment: true,
-                                            url: paymentRequest.payment_request.longurl
-                                        });
-                                    }).catch((err) => {
-                                        console.log(err);
-                                        res.status(500).json(err);
+                    if (user.Publisher && !user.Publisher.isPaymentVerified) {
+                        const payment = new Insta.PaymentData();
+                        payment.purpose = `Ads app Publisher account fees: ${user.email}`;            // REQUIRED
+                        payment.amount = 1000;                  // REQUIRED
+                        payment.phone = user.contact;                  // REQUIRED
+                        payment.buyer_name = user.firstName + ' ' + user.lastName;                  // REQUIRED
+                        // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + value.matchId;                  // REQUIRED
+                        // payment.send_email = 9;                  // REQUIRED
+                        payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${user.email}`;                 // REQUIRED
+                        // payment.send_sms = 9;                  // REQUIRED
+                        payment.email = user.email;                  // REQUIRED
+                        payment.allow_repeated_payments = false;                  // REQUIRED
+                        // payment.setRedirectUrl(REDIRECT_URL);
+                        Insta.isSandboxMode(true);
+                        Insta.createPayment(payment, function(error, response) {
+                            if (error) {
+                                // some error
+                                console.log(error);
+                                return res.status(500).json(error);
+                            } else {
+                                const paymentRequest = JSON.parse(response);
+                                console.log(paymentRequest);
+                                user.Publisher.paymentRequestId = paymentRequest.payment_request.id;
+                                user.Publisher.save().then(() => {
+                                    return res.status(200).json({
+                                        needPayment: true,
+                                        url: paymentRequest.payment_request.longurl
                                     });
-                                    // return res.status(200).json(paymentRequest.payment_request.longurl);
-                                    // Payment redirection link at paymentRequest.payment_request.longurl
-                                }
-                            });
-                        }
+                                }).catch((err) => {
+                                    console.log(err);
+                                    res.status(500).json(err);
+                                });
+                                // return res.status(200).json(paymentRequest.payment_request.longurl);
+                                // Payment redirection link at paymentRequest.payment_request.longurl
+                            }
+                        });
                     } else {
                         comparePasswords(password, user.password, function(error, isMatch) {
                             if(isMatch && !error) {
