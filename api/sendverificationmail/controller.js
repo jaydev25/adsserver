@@ -147,7 +147,7 @@ const sendVerificationEmail = (to, token) => {
                   return res.status(404).json('Please verify your Email!');
                 }
                 send({ // Overriding default parameters
-                  subject: 'Verify Your Email',         // Override value set as default
+                  subject: 'Reset Your Password',         // Override value set as default
                 }, function (err, res) {
                   console.log('* [example 1.1] send() callback returned: err:', err, '; res:', res);
                 });
