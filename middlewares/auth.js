@@ -61,7 +61,7 @@ AuthController.signUp = function(req, res) {
                 payment.buyer_name = value.firstName + ' ' + value.lastName;                  // REQUIRED
                 // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + value.matchId;                  // REQUIRED
                 // payment.send_email = 9;                  // REQUIRED
-                payment.webhook = `https://adsserver.herokuapp.com/verifypayment/${value.email}`;                 // REQUIRED
+                payment.webhook = `https://adsserver.herokuapp.com/verifypayment`;                 // REQUIRED
                 // payment.send_sms = 9;                  // REQUIRED
                 payment.email = value.email;                  // REQUIRED
                 payment.allow_repeated_payments = false;                  // REQUIRED
@@ -75,6 +75,11 @@ AuthController.signUp = function(req, res) {
                     } else {
                         paymentRequest = JSON.parse(response);
                         console.log(paymentRequest);
+                        // return res.status(200).json({
+                        //     success: true,
+                        //     url: paymentRequest.payment_request.longurl
+                        // });
+
                         // return res.status(200).json(paymentRequest.payment_request.longurl);
                         // Payment redirection link at paymentRequest.payment_request.longurl
                         
@@ -100,9 +105,12 @@ AuthController.signUp = function(req, res) {
                                         userId: user.id,
                                         token: crypto(16)
                                     }, { transaction: t }).then((result) => {
-                                        return sendVerificationEmail.sendVerificationEmail(req.body.email, result.token).then(() => {
+                                        return sendVerificationEmail.sendVerificationEmail(req.body.email, result.token, paymentRequest.payment_request.longurl).then(() => {
                                             return t.commit().then(() => {
-                                                return res.status(200).json(paymentRequest.payment_request.longurl);
+                                                return res.status(200).json({
+                                                    success: true,
+                                                    url: paymentRequest.payment_request.longurl
+                                                });
                                             });
                                         }).catch((err) => {
                                             console.log(err);
@@ -203,32 +211,20 @@ AuthController.verifypayment = (req, res) => {
         console.log(err);
         return res.status(422).json(err.details[0].message);
       } else if (params.status === 'Credit') {
-        return db.Users.findOne({
-            attributes: ['id'],
+        return db.Publishers.update({
+            isPaymentVerified: true,
+            paymentId: params.payment_id,
+            createdBy: params.buyer,
+            updatedBy: params.buyer
+            }, {
             where: {
-                email: req.params.email
-            },
-            raw: true
-        }).then((user) => {
-            return db.Publishers.update({
-                isPaymentVerified: true,
-                paymentId: params.payment_id,
-                createdBy: params.buyer,
-                updatedBy: params.buyer
-              }, {
-                where: {
-                  userId: user.id,
-                  paymentRequestId: params.payment_request_id  
-                }
-            }).then(data => {
-                return res.status(200).json(data);
-            }).catch(reason => {
-                console.log(reason);
-                return res.status(404).json(reason);
-            });
-        }).catch((err) => {
-            console.log(err);
-            return res.status(500).json(err);
+                paymentRequestId: params.payment_request_id  
+            }
+        }).then(data => {
+            return res.status(200).json(data);
+        }).catch(reason => {
+            console.log(reason);
+            return res.status(404).json(reason);
         });
       }
     });
