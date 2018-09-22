@@ -21,22 +21,22 @@ module.exports = {
       read: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       create: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       modify: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       delete: {
         allowNull: false,
         type: Sequelize.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       createdAt: {
         allowNull: false,

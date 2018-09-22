@@ -30,15 +30,15 @@ module.exports = {
       },
       isActive: {
         type: Sequelize.BOOLEAN,
-        default: true
+        defaultValue: true
       },
       points: {
         type: Sequelize.INTEGER,
-        default: 0
+        defaultValue: 0
       },
       isPaymentVerified: {
         type: Sequelize.BOOLEAN,
-        default: false
+        defaultValue: false
       },
       paymentRequestId: {
         type: Sequelize.STRING,

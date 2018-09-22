@@ -30,19 +30,19 @@ module.exports = (sequelize, DataTypes) => {
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      default: true
+      defaultValue: true
     },
     points: {
       type: DataTypes.INTEGER,
-      default: 0
+      defaultValue: 0
     },
     isPaymentVerified: {
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     },
     paymentRequestId: {
       type: DataTypes.STRING,
-      allowNull: false
+      defaultValue: false
     },
     paymentId: {
       type: DataTypes.STRING
