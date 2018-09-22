@@ -290,15 +290,15 @@ AuthController.authenticateUser = function(req, res) {
                     if (user.Publisher) {
                         if (!user.Publisher.isPaymentVerified) {
                             const payment = new Insta.PaymentData();
-                            payment.purpose = `Ads app Publisher account fees: ${value.email}`;            // REQUIRED
+                            payment.purpose = `Ads app Publisher account fees: ${user.email}`;            // REQUIRED
                             payment.amount = 1000;                  // REQUIRED
-                            payment.phone = value.contact;                  // REQUIRED
-                            payment.buyer_name = value.firstName + ' ' + value.lastName;                  // REQUIRED
+                            payment.phone = user.contact;                  // REQUIRED
+                            payment.buyer_name = user.firstName + ' ' + user.lastName;                  // REQUIRED
                             // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + value.matchId;                  // REQUIRED
                             // payment.send_email = 9;                  // REQUIRED
-                            payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${value.email}`;                 // REQUIRED
+                            payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${user.email}`;                 // REQUIRED
                             // payment.send_sms = 9;                  // REQUIRED
-                            payment.email = value.email;                  // REQUIRED
+                            payment.email = user.email;                  // REQUIRED
                             payment.allow_repeated_payments = false;                  // REQUIRED
                             // payment.setRedirectUrl(REDIRECT_URL);
                             Insta.isSandboxMode(true);
