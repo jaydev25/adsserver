@@ -20,22 +20,22 @@ module.exports = (sequelize, DataTypes) => {
     read: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     },
     create: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     },
     modify: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     },
     delete: {
       allowNull: false,
       type: DataTypes.BOOLEAN,
-      default: false
+      defaultValue: false
     },
     createdAt: {
       allowNull: false,

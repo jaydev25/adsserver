@@ -30,11 +30,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     isActive: {
       type: DataTypes.BOOLEAN,
-      default: true
+      defaultValue: true
     },
     points: {
       type: DataTypes.INTEGER,
-      default: 0
+      defaultValue: 0
     },
     createdAt: {
       allowNull: false,
