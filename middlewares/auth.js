@@ -105,7 +105,7 @@ AuthController.signUp = function(req, res) {
                                         userId: user.id,
                                         token: crypto(16)
                                     }, { transaction: t }).then((result) => {
-                                        return sendVerificationEmail.sendVerificationEmail(req.body.email, result.token, paymentRequest.payment_request.longurl).then(() => {
+                                        return sendVerificationEmail.sendVerificationEmail(req.body.email, result.token).then(() => {
                                             return t.commit().then(() => {
                                                 return res.status(200).json({
                                                     success: true,
@@ -267,7 +267,16 @@ AuthController.authenticateUser = function(req, res) {
         } else {
             const email = req.body.email,
                 password = req.body.password,
-                potentialUser = { where: { email: email } };
+                potentialUser = { 
+                    where: { email: email },
+                    include: [{
+                        model: db.Publishers,
+                        required: false
+                    }, {
+                        model: db.Subscribers,
+                        required: false
+                    }]
+                };
 
             return db.Users.findOne(potentialUser).then(function(user) {
                 if(!user) {
@@ -276,22 +285,64 @@ AuthController.authenticateUser = function(req, res) {
                     if (!user.isVerified) {
                         return res.status(404).json('Please verify your Email!');
                     }
-                    comparePasswords(password, user.password, function(error, isMatch) {
-                        if(isMatch && !error) {
-                            var token = jwt.sign(
-                                { email: user.email },
-                                config.keys.secret
-                            );
-
-                            return res.json({
-                                success: true,
-                                token: 'JWT ' + token,
-                                role: user.role
+                    console.log(user.Publisher);
+                    
+                    if (user.Publisher) {
+                        if (!user.Publisher.isPaymentVerified) {
+                            const payment = new Insta.PaymentData();
+                            payment.purpose = `Ads app Publisher account fees: ${value.email}`;            // REQUIRED
+                            payment.amount = 1000;                  // REQUIRED
+                            payment.phone = value.contact;                  // REQUIRED
+                            payment.buyer_name = value.firstName + ' ' + value.lastName;                  // REQUIRED
+                            // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + value.matchId;                  // REQUIRED
+                            // payment.send_email = 9;                  // REQUIRED
+                            payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${value.email}`;                 // REQUIRED
+                            // payment.send_sms = 9;                  // REQUIRED
+                            payment.email = value.email;                  // REQUIRED
+                            payment.allow_repeated_payments = false;                  // REQUIRED
+                            // payment.setRedirectUrl(REDIRECT_URL);
+                            Insta.isSandboxMode(true);
+                            Insta.createPayment(payment, function(error, response) {
+                                if (error) {
+                                    // some error
+                                    console.log(error);
+                                    return res.status(500).json(error);
+                                } else {
+                                    const paymentRequest = JSON.parse(response);
+                                    console.log(paymentRequest);
+                                    user.Publisher.paymentRequestId = paymentRequest.payment_request.id;
+                                    user.Publisher.save().then(() => {
+                                        return res.status(200).json({
+                                            needPayment: true,
+                                            url: paymentRequest.payment_request.longurl
+                                        });
+                                    }).catch((err) => {
+                                        console.log(err);
+                                        res.status(500).json(err);
+                                    });
+                                    // return res.status(200).json(paymentRequest.payment_request.longurl);
+                                    // Payment redirection link at paymentRequest.payment_request.longurl
+                                }
                             });
-                        } else {
-                            return res.status(404).json('Login failed!');
                         }
-                    });
+                    } else {
+                        comparePasswords(password, user.password, function(error, isMatch) {
+                            if(isMatch && !error) {
+                                var token = jwt.sign(
+                                    { email: user.email },
+                                    config.keys.secret
+                                );
+
+                                return res.json({
+                                    success: true,
+                                    token: 'JWT ' + token,
+                                    role: user.role
+                                });
+                            } else {
+                                return res.status(404).json('Login failed!');
+                            }
+                        });
+                    }
                 }
             }).catch(function(error) {
                 return res.status(500).json('There was an error!');

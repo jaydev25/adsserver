@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'development') {
   salt = bcrypt.genSaltSync(saltRounds);
 }
       
-const sendVerificationEmail = (to, token, url) => {
+const sendVerificationEmail = (to, token) => {
     const hostUrl = process.env.HOST_URL;
     // const request = sg.emptyRequest({
     //   method: "POST",
@@ -57,9 +57,7 @@ const sendVerificationEmail = (to, token, url) => {
         // bcc: 'some-user@mail.com',            // almost any option of `nodemailer` will be passed to it
         subject: 'test subject',
         // text:    'gmail-send example 1',         // Plain text
-        html: url ? `Click <a href="${hostUrl}/verification?token=${token}&email=${to}">here</a> to verify your email.
-          <p>Click <a href="${url}">here</a> for Payment link in case you haven't done payment yet.</p>
-          <p>Please ignore this email if you have not registered to Ads App</p>` : `Click <a href="${hostUrl}/verification?token=${token}&email=${to}">here</a> to verify your email.
+        html: `Click <a href="${hostUrl}/verification?token=${token}&email=${to}">here</a> to verify your email.
           <p>Please ignore this email if you have not registered to Ads App</p>`            // HTML
       });
 
