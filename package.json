@@ -11,7 +11,7 @@
     "test": "node test.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.302.0",
+    "aws-sdk": "^2.325.0",
     "bcrypt": "^3.0.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",

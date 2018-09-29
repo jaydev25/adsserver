@@ -15,15 +15,24 @@ function hookJWTStrategy(passport) {
     options.ignoreExpiration = false;
 
     passport.use(new JWTStrategy(options, function(JWTPayload, callback) {
-        db.Users.findOne({ where: { email: JWTPayload.email } })
-            .then(function(user) {
-                if(!user) {
-                    callback(null, false);
-                    return;
-                }
-
-                callback(null, user);
-            });
+        db.Users.findOne({ 
+            where: { 
+                email: JWTPayload.email 
+            }, 
+            include: [{
+                model: db.Publishers,
+                required: false 
+            }, {
+                model: db.Subscribers,
+                required: false
+            }]
+         }).then(function(user) {
+            if(!user) {
+                callback(null, false);
+                return;
+            }
+            callback(null, user);
+        });
     }));
 }
 
