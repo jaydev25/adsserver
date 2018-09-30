@@ -18,9 +18,6 @@ module.exports = (sequelize, DataTypes) => {
     description: {
       type: DataTypes.STRING
     },
-    ageGroup: {
-      type: DataTypes.STRING
-    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true

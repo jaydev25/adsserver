@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'development') {
 }
       
 const sendVerificationEmail = (to, token) => {
-    const hostUrl = process.env.HOST_URL;
+    const hostUrl = process.env.HOST_URL || 'http://localhost:5000';
     // const request = sg.emptyRequest({
     //   method: "POST",
     //   path: "/v3/mail/send",
