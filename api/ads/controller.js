@@ -40,8 +40,8 @@ const createAd = (req, res) => {
           
           const base64Data = new Buffer(params.image.replace(/^data:image\/\w+;base64,/, ""), 'base64')
           const type = params.image.split(';')[0].split('/')[1];
-          const contentType = s3.base64MimeType(base64Data);
-
+          const contentType = s3.base64MimeType(params.image);
+          
           const key = 'test/ads/' + req.user.id + '/' + ad.id;
           return db.AdsMedia.create({
             adId: ad.id,
