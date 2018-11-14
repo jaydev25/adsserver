@@ -102,7 +102,23 @@ const listing = (req, res) => {
   });
 }
 
+const getMetaData = (req, res) => {
+  return db.Categories.findAll({
+    attributes: ['id', 'name'],
+    include: [{
+      model: db.Subcategories,
+      attributes: ['id', 'catId', 'name']
+    }]
+  }).then(data => {
+    return res.status(200).json(data);
+  }).catch(reason => {
+    console.log(reason);
+    return res.status(404).json(`Data not found`);
+  });
+}
+
 module.exports = {
   createAd: createAd,
-  listing: listing
+  listing: listing,
+  getMetaData: getMetaData
 };
