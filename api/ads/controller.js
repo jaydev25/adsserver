@@ -29,8 +29,8 @@ const createAd = (req, res) => {
           userId: req.user.id,
           title: params.title,
           description: params.description,
-          catId: 2,
-          subcatId: 2,
+          catId: params.catId,
+          subcatId: params.subcatId,
           createdBy: req.user.email,
           updatedBy: req.user.email
         }, {
