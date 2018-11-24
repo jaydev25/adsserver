@@ -2,14 +2,14 @@ const db = require('../../storage/main/models/index');
 const s3 = require('../../helpers/s3');
 const Joi = require('joi');
 // Load the SDK and UUID
-
+const bluebird = require('bluebird');
 const createAd = (req, res) => {
   const schema = Joi.object().keys({
     title: Joi.string().required(),
     description: Joi.string(),
     catId: Joi.number(),
     subcatId: Joi.number(),
-    image: Joi.string()
+    images: Joi.array ()
   }).options({
     stripUnknown: true
   });
@@ -36,30 +36,34 @@ const createAd = (req, res) => {
         }, {
           transaction: t
         }).then((ad) => {
-          console.log(ad.id);
+          console.log(db.sequelize);
           
-          const base64Data = new Buffer(params.image.replace(/^data:image\/\w+;base64,/, ""), 'base64')
-          const type = params.image.split(';')[0].split('/')[1];
-          const contentType = s3.base64MimeType(params.image);
-          
-          const key = 'test/ads/' + req.user.id + '/' + ad.id;
-          return db.AdsMedia.create({
-            adId: ad.id,
-            media: key,
-            mediaURL: `${key}.${type}`,
-            mediaType: contentType,
-            createdBy: req.user.email,
-            updatedBy: req.user.email
-          }, {
-            transaction: t
+          return bluebird.mapSeries(params.images, (image, index) => {
+            const base64Data = new Buffer(image.replace(/^data:image\/\w+;base64,/, ""), 'base64')
+            const type = image.split(';')[0].split('/')[1];
+            const contentType = s3.base64MimeType(image);
+            
+            const key = 'test/ads/' + req.user.id + '/' + ad.id + '_' + index;
+            return db.AdsMedia.create({
+              adId: ad.id,
+              media: key,
+              mediaURL: `${key}.${type}`,
+              mediaType: contentType,
+              createdBy: req.user.email,
+              updatedBy: req.user.email
+            }, {
+              transaction: t
+            }).then(() => {
+              return s3.uploadFile(key, base64Data, type, contentType, 'base64');
+            });
           }).then(() => {
-            return s3.uploadFile(key, base64Data, type, contentType, 'base64').then(() => {
-              return t.commit().then(() => {
-                return res.status(200).json('Created Successfully');
-              });
+            return t.commit().then(() => {
+              return res.status(200).json('Created Successfully');
             });
           });
-        })
+        }).catch((err) => {
+          return res.status(500).json('Somthing went wrong' + err);
+        });
       });
     }
   });
