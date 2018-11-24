@@ -36,8 +36,6 @@ const createAd = (req, res) => {
         }, {
           transaction: t
         }).then((ad) => {
-          console.log(db.sequelize);
-          
           return bluebird.mapSeries(params.images, (image, index) => {
             const base64Data = new Buffer(image.replace(/^data:image\/\w+;base64,/, ""), 'base64')
             const type = image.split(';')[0].split('/')[1];
