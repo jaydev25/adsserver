@@ -119,8 +119,65 @@ const getMetaData = (req, res) => {
   });
 }
 
+const viewAd = (req, res) => {
+  const schema = Joi.object().keys({
+    adId: Joi.number().required(),
+    statType: Joi.string().required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.body, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      return db.AdsStats.create({
+        adId: params.adId,
+        userId: req.user.id,
+        statType: params.statType,
+        createdBy: req.user.email,
+        updatedBy :req.user.email
+      }).then(data => {
+        return res.status(200).json(data);
+      }).catch(reason => {
+        console.log(reason);
+        return res.status(404).json(`Data not found`);
+      });
+    }
+  });
+}
+
+const updateView = (req, res) => {
+  const schema = Joi.object().keys({
+    viewId: Joi.number().required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.params, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      return db.AdsStats.update({
+        updatedBy: req.user.email
+      }, {
+        where: {
+          id: params.viewId
+        }
+      }).then(data => {
+        return res.status(200).json(data);
+      }).catch(reason => {
+        console.log(reason);
+        return res.status(404).json(`Data not found`);
+      });
+    }
+  });
+}
+
 module.exports = {
   createAd: createAd,
   listing: listing,
-  getMetaData: getMetaData
+  getMetaData: getMetaData,
+  viewAd: viewAd,
+  updateView: updateView
 };
