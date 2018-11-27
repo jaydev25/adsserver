@@ -87,6 +87,10 @@ const listing = (req, res) => {
           }
         }, {
           model: db.AdsMedia,
+          required: true
+        }, {
+          model: db.AdsStats,
+          attributes: ['userId', 'createdAt', 'updatedAt', 'createdBy'],
           required: false
         }],
         order: [

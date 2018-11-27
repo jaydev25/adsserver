@@ -47,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     Ads.belongsTo(models.Categories, {foreignKey: 'catId', targetKey: 'id'});
     Ads.belongsTo(models.Subcategories, {foreignKey: 'subcatId', targetKey: 'id'});
     Ads.hasMany(models.AdsMedia, {foreignKey: 'adId', sourceKey: 'id'});
+    Ads.hasMany(models.AdsStats, {foreignKey: 'adId', sourceKey: 'id'});
     Ads.hasMany(models.AdsFilters, {foreignKey: 'adId', sourceKey: 'id'});
   };
   return Ads;
