@@ -1,6 +1,7 @@
 const db = require('../../storage/main/models/index');
 const s3 = require('../../helpers/s3');
 const Joi = require('joi');
+const _ = require('lodash');
 // Load the SDK and UUID
 const bluebird = require('bluebird');
 const createAd = (req, res) => {
@@ -99,10 +100,26 @@ const listing = (req, res) => {
         offset: params.offset,
         limit: 20
       }).then(ads => {
-        return res.status(200).json(ads);
+        const result = [];
+        ads.forEach((ad) => {
+          ad = ad.toJSON();
+          ad.views = ad.AdsStats.length;
+          ad.userViews = ad.duration = 0;
+          _.forEach(ad.AdsStats, (stat) => {
+            if (stat.userId === req.user.id) {
+              ad.userViews += 1;
+              const createdAt = new Date(stat.createdAt);
+              const updatedAt = new Date(stat.updatedAt);
+              ad.duration += (updatedAt.getTime() - createdAt.getTime()) / 1000;
+            }
+          });
+          delete ad.AdsStats;
+          result.push(ad);
+        });
+        return res.status(200).json(result);
       }).catch(reason => {
         console.log(reason);
-        return res.status(404).json(`Matches not found`);
+        return res.status(404).json(`Ads not found`);
       });
     }
   });
@@ -142,7 +159,14 @@ const viewAd = (req, res) => {
         createdBy: req.user.email,
         updatedBy :req.user.email
       }).then(data => {
-        return res.status(200).json(data);
+        return db.AdsStats.aggregate('createdBy', 'DISTINCT', { plain: false }).then(viewers => {
+          viewers = _.map(viewers, 'DISTINCT');
+          return res.status(200).json({data, viewers});
+        }).catch(reason => {
+          console.log(reason);
+          return res.status(404).json(`Data not found`);
+        });
+        // return res.status(200).json(data);
       }).catch(reason => {
         console.log(reason);
         return res.status(404).json(`Data not found`);
@@ -178,10 +202,154 @@ const updateView = (req, res) => {
   });
 }
 
+const myAds = (req, res) => {
+  const schema = Joi.object().keys({
+    offset: Joi.number().required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.query, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      return db.Ads.findAll({
+        include: [{
+          model: db.Users,
+          attributes: ['id', 'email', 'contact'],
+          where: {
+            isVerified: true
+          }
+        }, {
+          model: db.AdsMedia,
+          required: true
+        }, {
+          model: db.AdsStats,
+          attributes: ['userId', 'createdAt', 'updatedAt', 'createdBy'],
+          required: false
+        }],
+        order: [
+          ['createdAt', 'DESC']
+        ],
+        where: {
+          userId: req.user.id
+        },
+        offset: params.offset,
+        limit: 20
+      }).then(ads => {
+        const result = [];
+        ads.forEach((ad) => {
+          ad = ad.toJSON();
+          ad.views = ad.AdsStats.length;
+          ad.userViews = ad.duration = 0;
+          _.forEach(ad.AdsStats, (stat) => {
+            if (stat.userId === req.user.id) {
+              ad.userViews += 1;
+              const createdAt = new Date(stat.createdAt);
+              const updatedAt = new Date(stat.updatedAt);
+              ad.duration += (updatedAt.getTime() - createdAt.getTime()) / 1000;
+            }
+          });
+          ad.viewUsers = [];
+          ad.viewers = [];
+          _.forEach(_.groupBy(ad.AdsStats, 'createdBy'), (element, key) => {
+            ad.viewUsers.push({
+              user: key,
+              duration: _.sumBy(element, function(o) {
+                const createdAt = new Date(o.createdAt);
+                const updatedAt = new Date(o.updatedAt);
+                var seconds = (updatedAt.getTime() - createdAt.getTime()) / 1000;
+                return seconds;
+              }),
+              views: element.length
+            });
+            ad.viewers.push(key);
+            delete ad.AdsStats;
+          });
+          result.push(ad);
+        });
+        return res.status(200).json(result);
+      }).catch(reason => {
+        console.log(reason);
+        return res.status(404).json(`Ads not found`);
+      });
+    }
+  });
+}
+
+const deleteAd = (req, res) => {
+  const schema = Joi.object().keys({
+    id: Joi.number().required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.params, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      return db.sequelize.transaction().then((t) => {
+        return db.AdsStats.destroy({
+          where: {
+            adId: params.id
+          },
+          transaction: t
+        }).then(() => {
+          return db.AdsMedia.destroy({
+            where: {
+              adId: params.id,
+            },
+            transaction: t
+          }).then(() => {
+            return db.AdsFilters.destroy({
+              where: {
+                adId: params.id,
+              },
+              transaction: t
+            }).then(() => {
+              return db.Ads.destroy({
+                where: {
+                  id: params.id,
+                  userId: req.user.id
+                },
+                transaction: t
+              }).then(data => {
+                if (data) {
+                  return t.commit().then(() => {
+                    return res.status(200).json('Ad deleted Successfully');
+                  })
+                } else {
+                  return res.status(404).json('Unable to delete Ad');
+                }
+              }).catch(reason => {
+                console.log(reason);
+                return res.status(404).json(`Data not found`);
+              });
+            }).catch(reason => {
+              console.log(reason);
+              return res.status(404).json(`Data not found`);
+            });
+          }).catch(reason => {
+            console.log(reason);
+            return res.status(404).json(`Data not found`);
+          });
+        }).catch(reason => {
+          console.log(reason);
+          return res.status(404).json(`Data not found`);
+        });
+      }).catch((e) => {
+        return res.status(404).json(e);
+      })
+    }
+  });
+}
+
 module.exports = {
   createAd: createAd,
   listing: listing,
   getMetaData: getMetaData,
   viewAd: viewAd,
-  updateView: updateView
+  updateView: updateView,
+  myAds: myAds,
+  deleteAd: deleteAd
 };
