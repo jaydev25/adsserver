@@ -44,5 +44,18 @@ module.exports = (sequelize, DataTypes) => {
     AdsStats.belongsTo(models.Ads, {foreignKey: 'adId', targetKey: 'id'});
     AdsStats.belongsTo(models.Users, {foreignKey: 'userId', targetKey: 'id'});
   };
+  AdsStats.afterUpdate(function(AdsStat) {
+    // AdsStat.mood = 'happy'
+    console.log('////////////////////', AdsStat);
+    const data = AdsStat.getDataValues();
+    return sequelize.models.RewardsClass.findOne({
+      where: {
+        id: data.classId
+      }
+    }).then((result) => {
+      console.log('????????????????????', result);
+    });
+    return sequelize.Promise.resolve()
+  })
   return AdsStats;
 };

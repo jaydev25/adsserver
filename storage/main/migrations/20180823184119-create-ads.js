@@ -30,6 +30,11 @@ module.exports = {
         type: Sequelize.INTEGER,
         references: { model: 'Subcategories', key: 'id' }
       },
+      classId: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: { model: 'RewardsClass', key: 'id' }
+      },
       views: {
         type: Sequelize.INTEGER,
         defaultValue: 0

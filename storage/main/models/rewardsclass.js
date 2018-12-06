@@ -36,6 +36,7 @@ module.exports = (sequelize, DataTypes) => {
   });
   RewardsClass.associate = function(models) {
     // associations can be defined here
+    RewardsClass.hasMany(models.RewardsClass, {foreignKey: 'classId', sourceKey: 'id'});
   };
   return RewardsClass;
 };

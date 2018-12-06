@@ -32,6 +32,7 @@ const createAd = (req, res) => {
           description: params.description,
           catId: params.catId,
           subcatId: params.subcatId,
+          classId: 1,
           createdBy: req.user.email,
           updatedBy: req.user.email
         }, {
@@ -191,7 +192,8 @@ const updateView = (req, res) => {
       }, {
         where: {
           id: params.viewId
-        }
+        },
+        individualHooks: true
       }).then(data => {
         return res.status(200).json(data);
       }).catch(reason => {
