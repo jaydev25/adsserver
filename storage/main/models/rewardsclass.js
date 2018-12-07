@@ -32,11 +32,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     }
   }, {
+    tableName: 'RewardsClass',
     timestamps: true
   });
   RewardsClass.associate = function(models) {
     // associations can be defined here
-    RewardsClass.hasMany(models.RewardsClass, {foreignKey: 'classId', sourceKey: 'id'});
+    RewardsClass.hasMany(models.Ads, {foreignKey: 'classId', sourceKey: 'id'});
   };
   return RewardsClass;
 };
