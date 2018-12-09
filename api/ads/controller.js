@@ -437,11 +437,6 @@ module.exports = {
   viewAd: viewAd,
   updateView: updateView,
   myAds: myAds,
-<<<<<<< HEAD
   deleteAd: deleteAd,
   viewMyAd: viewMyAd
 };
-=======
-  deleteAd: deleteAd
-};
->>>>>>> d636833ce5c05cee49b7935ef0231c43d771799c
