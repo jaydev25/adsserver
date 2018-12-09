@@ -42,7 +42,7 @@ const createAd = (req, res) => {
             const base64Data = new Buffer(image.replace(/^data:image\/\w+;base64,/, ""), 'base64')
             const type = image.split(';')[0].split('/')[1];
             const contentType = s3.base64MimeType(image);
-            
+
             const key = 'test/ads/' + req.user.id + '/' + ad.id + '_' + index;
             return db.AdsMedia.create({
               adId: ad.id,
@@ -222,7 +222,8 @@ const updateView = (req, res) => {
         where: {
           id: params.viewId
         },
-        individualHooks: true
+        individualHooks: true,
+        user: req.user
       }).then(data => {
         return res.status(200).json(data);
       }).catch(reason => {
@@ -436,6 +437,11 @@ module.exports = {
   viewAd: viewAd,
   updateView: updateView,
   myAds: myAds,
+<<<<<<< HEAD
   deleteAd: deleteAd,
   viewMyAd: viewMyAd
 };
+=======
+  deleteAd: deleteAd
+};
+>>>>>>> d636833ce5c05cee49b7935ef0231c43d771799c
