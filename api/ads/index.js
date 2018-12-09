@@ -10,5 +10,6 @@ router.get('/api/ads/listing/', passport.authenticate('jwt', { session: false })
 router.get('/api/ads/myads/', passport.authenticate('jwt', { session: false }), AdsController.myAds);
 router.delete('/api/ads/delete/:id', passport.authenticate('jwt', { session: false }), AdsController.deleteAd);
 router.get('/api/ads/getmetadata/', passport.authenticate('jwt', { session: false }), AdsController.getMetaData);
+router.post('/api/ads/viewmyad',  passport.authenticate('jwt', { session: false }), AdsController.viewMyAd);
 
 module.exports = router;

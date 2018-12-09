@@ -160,9 +160,38 @@ const viewAd = (req, res) => {
         createdBy: req.user.email,
         updatedBy :req.user.email
       }).then(data => {
-        return db.AdsStats.aggregate('createdBy', 'DISTINCT', { plain: false }).then(viewers => {
-          viewers = _.map(viewers, 'DISTINCT');
-          return res.status(200).json({data, viewers});
+        return db.AdsStats.findAll({
+          attributes: [
+            [db.sequelize.literal('EXTRACT(EPOCH FROM ("AdsStats"."updatedAt" - "AdsStats"."createdAt"))'), 'duration'],
+            'adId',
+            'userId',
+            'createdBy'
+          ],
+          where: {
+            adId: params.adId,
+            statType: params.statType
+          },
+          raw: true
+        }).then(allViews => {
+          const ad = {
+            userViews: 0,
+            viewUsers: [],
+            viewers: []
+          };
+          _.forEach(allViews, (stat) => {
+            if (stat.userId === req.user.id) {
+              ad.userViews += 1;
+            }
+          });
+          _.forEach(_.groupBy(allViews, 'createdBy'), (element, key) => {
+            ad.viewUsers.push({
+              user: key,
+              duration: _.sumBy(element, 'duration'),
+              views: element.length
+            });
+            ad.viewers.push(key);
+          });
+          return res.status(200).json({data, ad});
         }).catch(reason => {
           console.log(reason);
           return res.status(404).json(`Data not found`);
@@ -227,7 +256,11 @@ const myAds = (req, res) => {
           required: true
         }, {
           model: db.AdsStats,
-          attributes: ['userId', 'createdAt', 'updatedAt', 'createdBy'],
+          attributes: [
+            'userId',
+            'createdAt',
+            [db.sequelize.literal('EXTRACT(EPOCH FROM ("AdsStats"."updatedAt" - "AdsStats"."createdAt"))'), 'duration']
+          ],
           required: false
         }],
         order: [
@@ -243,31 +276,28 @@ const myAds = (req, res) => {
         ads.forEach((ad) => {
           ad = ad.toJSON();
           ad.views = ad.AdsStats.length;
-          ad.userViews = ad.duration = 0;
-          _.forEach(ad.AdsStats, (stat) => {
-            if (stat.userId === req.user.id) {
-              ad.userViews += 1;
-              const createdAt = new Date(stat.createdAt);
-              const updatedAt = new Date(stat.updatedAt);
-              ad.duration += (updatedAt.getTime() - createdAt.getTime()) / 1000;
-            }
-          });
-          ad.viewUsers = [];
-          ad.viewers = [];
-          _.forEach(_.groupBy(ad.AdsStats, 'createdBy'), (element, key) => {
-            ad.viewUsers.push({
-              user: key,
-              duration: _.sumBy(element, function(o) {
-                const createdAt = new Date(o.createdAt);
-                const updatedAt = new Date(o.updatedAt);
-                var seconds = (updatedAt.getTime() - createdAt.getTime()) / 1000;
-                return seconds;
-              }),
-              views: element.length
-            });
-            ad.viewers.push(key);
-            delete ad.AdsStats;
-          });
+          // ad.userViews = 0;
+          // _.forEach(ad.AdsStats, (stat) => {
+          //   if (stat.userId === req.user.id) {
+          //     ad.userViews += 1;
+          //   }
+          // });
+          // ad.viewUsers = [];
+          // ad.viewers = [];
+          // _.forEach(_.groupBy(ad.AdsStats, 'createdBy'), (element, key) => {
+          //   ad.viewUsers.push({
+          //     user: key,
+          //     duration: _.sumBy(element, function(o) {
+          //       const createdAt = new Date(o.createdAt);
+          //       const updatedAt = new Date(o.updatedAt);
+          //       var seconds = (updatedAt.getTime() - createdAt.getTime()) / 1000;
+          //       return seconds;
+          //     }),
+          //     views: element.length
+          //   });
+          //   ad.viewers.push(key);
+          // });
+          delete ad.AdsStats;
           result.push(ad);
         });
         return res.status(200).json(result);
@@ -346,6 +376,59 @@ const deleteAd = (req, res) => {
   });
 }
 
+const viewMyAd = (req, res) => {
+  const schema = Joi.object().keys({
+    adId: Joi.number().required(),
+    statType: Joi.string().required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.body, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      return db.AdsStats.findAll({
+        attributes: [
+          [db.sequelize.literal('EXTRACT(EPOCH FROM ("updatedAt" - "createdAt"))'), 'duration'],
+          'adId',
+          'userId',
+          ['createdBy', 'user']
+        ],
+        where: {
+          adId: params.adId,
+          statType: params.statType
+        },
+        raw: true
+      }).then(allViews => {
+        const ad = {
+          userViews: 0,
+          viewUsers: [],
+          viewers: []
+        };
+        _.forEach(allViews, (stat) => {
+          if (stat.userId === req.user.id) {
+            ad.userViews += 1;
+          }
+        });
+        _.forEach(_.groupBy(allViews, 'user'), (element, key) => {
+          ad.viewUsers.push({
+            user: key,
+            duration: _.sumBy(element, 'duration'),
+            views: element.length
+          });
+          ad.viewers.push(key);
+        });
+        return res.status(200).json({allViews, ad});
+      }).catch(reason => {
+        console.log(reason);
+        return res.status(404).json(`Data not found`);
+      });
+      // return res.status(200).json(data);
+    }
+  });
+}
+
 module.exports = {
   createAd: createAd,
   listing: listing,
@@ -353,5 +436,6 @@ module.exports = {
   viewAd: viewAd,
   updateView: updateView,
   myAds: myAds,
-  deleteAd: deleteAd
+  deleteAd: deleteAd,
+  viewMyAd: viewMyAd
 };

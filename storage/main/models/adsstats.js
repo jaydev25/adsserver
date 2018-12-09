@@ -47,14 +47,14 @@ module.exports = (sequelize, DataTypes) => {
   AdsStats.afterUpdate(function(AdsStat) {
     // AdsStat.mood = 'happy'
     console.log('////////////////////', AdsStat);
-    const data = AdsStat.getDataValues();
-    return sequelize.models.RewardsClass.findOne({
-      where: {
-        id: data.classId
-      }
-    }).then((result) => {
-      console.log('????????????????????', result);
-    });
+    // const data = AdsStat.getDataValues();
+    // return sequelize.models.RewardsClass.findOne({
+    //   where: {
+    //     id: data.classId
+    //   }
+    // }).then((result) => {
+    //   console.log('????????????????????', result);
+    // });
     return sequelize.Promise.resolve()
   })
   return AdsStats;
