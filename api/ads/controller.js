@@ -394,7 +394,8 @@ const viewMyAd = (req, res) => {
           [db.sequelize.literal('EXTRACT(EPOCH FROM ("updatedAt" - "createdAt"))'), 'duration'],
           'adId',
           'userId',
-          ['createdBy', 'user']
+          ['createdBy', 'user'],
+          'createdAt'
         ],
         where: {
           adId: params.adId,

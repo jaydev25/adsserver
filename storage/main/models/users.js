@@ -66,6 +66,9 @@ module.exports = (sequelize, DataTypes) => {
             city: options.data.city,
             birthDate: options.data.birthDate,
             occupation: options.data.occupation,
+            address: options.data.address,
+            gender: options.data.gender,
+            pincode: options.data.pincode,
             paymentRequestId: options.paymentRequestId,
             createdBy: options.data.email,
             updatedBy: options.data.email

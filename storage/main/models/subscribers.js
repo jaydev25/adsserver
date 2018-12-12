@@ -28,6 +28,15 @@ module.exports = (sequelize, DataTypes) => {
     occupation: {
       type: DataTypes.STRING
     },
+    address: {
+      type: DataTypes.STRING
+    },
+    gender: {
+      type: DataTypes.STRING
+    },
+    pincode: {
+      type: DataTypes.INTEGER
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true

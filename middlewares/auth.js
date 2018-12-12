@@ -35,7 +35,10 @@ AuthController.signUp = function(req, res) {
         state: Joi.string().required(),
         city: Joi.string().required(),
         birthDate: Joi.date().required(),
-        occupation: Joi.string().required()
+        occupation: Joi.string().required(),
+        address: Joi.string().required(),
+        gender: Joi.string().required(),
+        pincode: Joi.number().required()
     }).options({
         stripUnknown: true
     });

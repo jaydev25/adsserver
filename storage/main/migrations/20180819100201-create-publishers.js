@@ -28,6 +28,15 @@ module.exports = {
       occupation: {
         type: Sequelize.STRING
       },
+      address: {
+        type: Sequelize.STRING(400)
+      },
+      gender: {
+        type: Sequelize.STRING
+      },
+      pincode: {
+        type: Sequelize.INTEGER
+      },
       isActive: {
         type: Sequelize.BOOLEAN,
         defaultValue: true
