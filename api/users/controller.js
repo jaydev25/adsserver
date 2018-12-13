@@ -2,6 +2,11 @@ const db = require('../../storage/main/models/index');
 const s3 = require('../../helpers/s3');
 const Joi = require('joi');
 const _ = require('lodash');
+const Insta = require('instamojo-nodejs');
+const API_KEY = process.env.INSTAMOJO_API_KEY_ADS || 'test_f6dcb6d040f7cdf5fc7884233e8';
+const AUTH_KEY = process.env.INSTAMOJO_AUTH_KEY_ADS || 'test_f9531e70b8123199e8cc5467d38';
+Insta.setKeys(API_KEY, AUTH_KEY);
+
 // Load the SDK and UUID
 const bluebird = require('bluebird');
 const updateUser = (req, res) => {
@@ -66,11 +71,6 @@ const updateUser = (req, res) => {
                 // return res.status(200).json(paymentRequest.payment_request.longurl);
                 // Payment redirection link at paymentRequest.payment_request.longurl
                 
-                if (process.env.NODE_ENV === 'development') {
-                    newUser.password = bcrypt.hashSync(req.body.password);
-                } else {
-                    newUser.password = bcrypt.hashSync(req.body.password, salt);
-                }
                 // Attempt to save the user
                 return db.sequelize.transaction().then((t) => {
                     return db.Users.update(oldUser, {
@@ -97,11 +97,6 @@ const updateUser = (req, res) => {
             }
         });                               
       } else if (value.accType === 'Subscriber') {
-        if (process.env.NODE_ENV === 'development') {
-            newUser.password = bcrypt.hashSync(req.body.password);
-        } else {
-            newUser.password = bcrypt.hashSync(req.body.password, salt);
-        }
         // Attempt to save the user
         return db.sequelize.transaction().then((t) => {
           return db.Users.update(oldUser, {
