@@ -81,6 +81,32 @@ module.exports = (sequelize, DataTypes) => {
             return reject(error);
           });
         });
+      },
+      afterUpdate: (user, options) => {
+        return new Promise ((resolve, reject) => {
+          console.log(sequelize.models);
+          return sequelize.models[options.data.accType + 's'].upsert({
+            userId: user.id,
+            country: options.data.country,
+            state: options.data.state,
+            city: options.data.city,
+            birthDate: options.data.birthDate,
+            occupation: options.data.occupation,
+            address: options.data.address,
+            gender: options.data.gender,
+            pincode: options.data.pincode,
+            paymentRequestId: options.paymentRequestId,
+            createdBy: options.data.email,
+            updatedBy: options.data.email
+          }, {
+            transaction: options.transaction
+          }).then(() => {
+            return resolve();
+          }).catch((error) => {
+            console.log(error);
+            return reject(error);
+          });
+        });
       }
     }
   });
