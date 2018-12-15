@@ -14,7 +14,11 @@ const VerificationController = (req, res) => {
             .then((foundToken) => {
               if(foundToken){
                 return user
-                  .update({ isVerified: true })
+                  .update({
+                    isVerified: true
+                  }, {
+                    hooks: false
+                  })
                   .then(updatedUser => {
                     return res.status(403).json(`User with ${user.email} has been verified`);
                   })
