@@ -207,7 +207,8 @@ const viewAd = (req, res) => {
 
 const updateView = (req, res) => {
   const schema = Joi.object().keys({
-    viewId: Joi.number().required()
+    viewId: Joi.number().required(),
+    userId: Joi.number().required()
   }).options({
     stripUnknown: true
   });
@@ -222,6 +223,7 @@ const updateView = (req, res) => {
         where: {
           id: params.viewId
         },
+        hools: (params.userId === req.user.id) ? false : true,
         individualHooks: true,
         user: req.user
       }).then(data => {

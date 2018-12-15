@@ -46,9 +46,15 @@ module.exports = (sequelize, DataTypes) => {
   };
   AdsStats.afterUpdate(function(AdsStat, options) {
     // AdsStat.mood = 'happy'
-    console.log('////////////////////', options.user.Publisher);
+    console.log('////////////////////', options.user);
     const data = AdsStat.get();
     return sequelize.models.Ads.findOne({
+      attributes: [
+        [sequelize.literal('EXTRACT(EPOCH FROM ("AdsStats"."updatedAt" - "AdsStats"."createdAt"))'), 'duration'],
+        'adId',
+        'userId',
+        'createdBy'
+      ],
       include: [{
         model: sequelize.models.RewardsClass,
         required: true
@@ -59,15 +65,11 @@ module.exports = (sequelize, DataTypes) => {
       raw: true
     }).then((ad) => {
       console.log('????????????????????', ad);
-      const createdAt = new Date(data.createdAt);
-      const updatedAt = new Date(data.updatedAt);
-      data.duration = 0;
-      data.duration += (updatedAt.getTime() - createdAt.getTime()) / 1000;
+      // const createdAt = new Date(data.createdAt);
+      // const updatedAt = new Date(data.updatedAt);
+      // data.duration = 0;
+      // data.duration += (updatedAt.getTime() - createdAt.getTime()) / 1000;
       if (data.duration > 10) {
-        let isSubscriber = true;
-        if (options.user.Publisher) {
-          isSubscriber = false;
-        }
         const beforeRewards = options.user.Subscriber ? options.user.Subscriber.points : options.user.Publisher.points;
         sequelize.models.Rewards.findOrCreate({
           where: {
@@ -84,23 +86,13 @@ module.exports = (sequelize, DataTypes) => {
             updatedBy: options.user.email
           }
         }).then(() => {
-          if (isSubscriber) {
-            sequelize.models.Subscribers.update({
-              points: beforeRewards + ad['RewardsClass.points']
-            }, {
-              where: {
-                userId: data.userId
-              }
-            });
-          } else {
-            sequelize.models.Publishers.update({
-              points: beforeRewards + ad['RewardsClass.points']
-            }, {
-              where: {
-                userId: data.userId
-              }
-            });
-          }
+          sequelize.models.Users.update({
+            points: beforeRewards + ad['RewardsClass.points']
+          }, {
+            where: {
+              id: data.userId
+            }
+          });
         });
       }
       return sequelize.Promise.resolve();

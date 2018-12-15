@@ -41,10 +41,6 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         defaultValue: true
       },
-      points: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
-      },
       isPaymentVerified: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
