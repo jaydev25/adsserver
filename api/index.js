@@ -7,5 +7,6 @@ router.use('/verification', require('./verification'))
 router.use('/', require('./sendverificationmail'))
 router.use('/', require('./region'))
 router.use('/', require('./ads'))
+router.use('/', require('./users'))
 
 module.exports = router
