@@ -36,11 +36,16 @@ const uploadFile = (key, data, type, ContentType, ContentEncoding) => {
             ContentEncoding: ContentEncoding, // required
             ContentType: ContentType // required. Notice the back ticks
         }
-        s3.upload(params, function(s3Err, data) {
-            if (s3Err) throw s3Err
-            console.log(`File uploaded successfully at ${data.Location}`)
-            return resolve();
-        });
+        try {
+            s3.upload(params, function(s3Err, data) {
+                if (s3Err) throw s3Err
+                console.log(`File uploaded successfully at ${data.Location}`)
+                return resolve();
+            });
+        } catch (e) {
+            console.log(e);
+            return reject(e);
+        }
     })
 //   });
 };

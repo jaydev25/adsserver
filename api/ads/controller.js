@@ -223,8 +223,7 @@ const updateView = (req, res) => {
         where: {
           id: params.viewId
         },
-        hools: (params.userId === req.user.id) ? false : true,
-        individualHooks: true,
+        individualHooks: (params.userId == req.user.id) ? false : true,
         user: req.user
       }).then(data => {
         return res.status(200).json(data);
