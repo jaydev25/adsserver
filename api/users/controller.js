@@ -34,24 +34,32 @@ const updateUser = (req, res) => {
       return res.status(422).json(err.details[0].message);
     } else {
       const oldUser = {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        contact: req.body.contact,
-        createdBy: req.body.email,
-        updatedBy: req.body.email
+        firstName: params.firstName,
+        lastName: params.lastName,
+        contact: params.contact,
+        createdBy: params.email,
+        updatedBy: params.email,
+        country: params.country,
+        state: params.state,
+        city: params.city,
+        birthDate: params.birthDate,
+        occupation: params.occupation,
+        address: params.address,
+        gender: params.gender,
+        pincode: params.pincode
       };
       let paymentRequest = {};
-      if (value.accType === 'Publisher') {
+      if (params.accType === 'Publisher' && !req.user.Publisher) {
         const payment = new Insta.PaymentData();
-        payment.purpose = `Ads app Publisher account fees: ${value.email}`;            // REQUIRED
+        payment.purpose = `Ads app Publisher account fees: ${params.email}`;            // REQUIRED
         payment.amount = 1000;                  // REQUIRED
-        payment.phone = value.contact;                  // REQUIRED
-        payment.buyer_name = value.firstName + ' ' + value.lastName;                  // REQUIRED
-        // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + value.matchId;                  // REQUIRED
+        payment.phone = params.contact;                  // REQUIRED
+        payment.buyer_name = params.firstName + ' ' + params.lastName;                  // REQUIRED
+        // payment.redirect_url = 'https://adsserver.herokuapp.com/varifypayment?userId=' + req.user.id + '&matchId=' + params.matchId;                  // REQUIRED
         // payment.send_email = 9;                  // REQUIRED
-        payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${value.email}`;                 // REQUIRED
+        payment.webhook = `https://adsserver.herokuapp.com/signup/verifypayment/${params.email}`;                 // REQUIRED
         // payment.send_sms = 9;                  // REQUIRED
-        payment.email = value.email;                  // REQUIRED
+        payment.email = params.email;                  // REQUIRED
         payment.allow_repeated_payments = false;                  // REQUIRED
         // payment.setRedirectUrl(REDIRECT_URL);
         Insta.isSandboxMode(true);
@@ -77,7 +85,7 @@ const updateUser = (req, res) => {
                         where: { id:  req.user.id },
                         transaction: t,
                         paymentRequestId: paymentRequest.payment_request.id,
-                        data: value
+                        data: params
                     }).spread(() => {
                         // if user email already exists
                         return t.commit().then(() => {
@@ -96,14 +104,15 @@ const updateUser = (req, res) => {
                 });
             }
         });                               
-      } else if (value.accType === 'Subscriber') {
+      } else {
         // Attempt to save the user
         return db.sequelize.transaction().then((t) => {
           return db.Users.update(oldUser, {
             where: { id:  req.user.id },
             transaction: t,
-            data: value
-          }).spread(() => {
+            individualHooks: true,
+            data: params
+          }).spread((user) => {
                 // if user email already exists
                 return t.commit().then(() => {
                   return res.status(200).json({
