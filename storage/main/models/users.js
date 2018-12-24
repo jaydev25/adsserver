@@ -90,6 +90,7 @@ module.exports = (sequelize, DataTypes) => {
         return new Promise ((resolve, reject) => {
           console.log(sequelize.models);
           return sequelize.models[options.data.accType + 's'].upsert({
+            id: options.user[options.data.accType].id,
             userId: user.id,
             country: options.data.country,
             state: options.data.state,
