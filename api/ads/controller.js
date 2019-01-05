@@ -432,6 +432,45 @@ const viewMyAd = (req, res) => {
   });
 }
 
+const downloadStats = (req, res) => {
+  const schema = Joi.object().keys({
+    adId: Joi.number().required(),
+    statType: Joi.string().required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.body, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      return db.AdsStats.findAll({
+        attributes: [
+          'userId',
+          ['createdBy', 'user'],
+          'adId',
+          [db.sequelize.literal('EXTRACT(EPOCH FROM ("updatedAt" - "createdAt"))'), 'duration'],
+          [db.sequelize.fn('to_char', db.sequelize.col('createdAt'), 'DD Mon YYYY'), 'createdAt']
+        ],
+        where: {
+          adId: params.adId,
+          statType: params.statType
+        },
+        raw: true
+      }).then(allViews => {
+        return res.status(200).json({
+          success: true,
+          data: allViews
+        });
+      }).catch(reason => {
+        console.log(reason);
+        return res.status(404).json(`Data not found`);
+      });
+      // return res.status(200).json(data);
+    }
+  });
+}
+
 module.exports = {
   createAd: createAd,
   listing: listing,
@@ -440,5 +479,6 @@ module.exports = {
   updateView: updateView,
   myAds: myAds,
   deleteAd: deleteAd,
-  viewMyAd: viewMyAd
+  viewMyAd: viewMyAd,
+  downloadStats: downloadStats
 };
