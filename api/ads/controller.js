@@ -7,6 +7,8 @@ const bluebird = require('bluebird');
 const createAd = (req, res) => {
   const schema = Joi.object().keys({
     title: Joi.string().required(),
+    pickup: Joi.string().required(),
+    drop: Joi.string().required(),
     description: Joi.string(),
     catId: Joi.number(),
     subcatId: Joi.number(),
@@ -29,6 +31,8 @@ const createAd = (req, res) => {
         return db.Ads.create({
           userId: req.user.id,
           title: params.title,
+          pickup: params.pickup,
+          drop: params.drop,
           description: params.description,
           catId: params.catId,
           subcatId: params.subcatId,

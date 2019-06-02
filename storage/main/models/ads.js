@@ -15,6 +15,12 @@ module.exports = (sequelize, DataTypes) => {
     title: {
       type: DataTypes.STRING
     },
+    pickup: {
+      type: DataTypes.STRING
+    },
+    drop: {
+      type: DataTypes.STRING
+    },
     description: {
       type: DataTypes.STRING
     },
