@@ -61,11 +61,46 @@ const updateUser = (req, res) => {
                         return res.status(500).json(error1);
                     });
                 });
-            });                       
+            });
         }
     });
 }
 
+const getUserByEmail = (req, res) => {
+  const schema = Joi.object().keys({
+    email: Joi.string().email({ minDomainAtoms: 2 }).required()
+  }).options({
+    stripUnknown: true
+  });
+
+  return Joi.validate(req.body, schema, function (err, params) {
+    if (err) {
+      return res.status(422).json(err.details[0].message);
+    } else {
+      const potentialUser = {
+        where: { email: params.email },
+        include: [{
+          model: db.Publishers,
+          required: true
+        }]
+      };
+
+      return db.Users.findOne(potentialUser).then((user) => {
+        // if user email already exists
+        return res.status(200).json({
+          success: true,
+          publisherInfo: user
+        });
+      }).catch((error1) => {
+        console.log('find or create');
+        console.log(error1);
+        return res.status(500).json(error1);
+      });
+    }
+  });
+}
+
 module.exports = {
-  updateUser: updateUser
+  updateUser: updateUser,
+  getUserByEmail: getUserByEmail
 };

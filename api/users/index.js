@@ -10,5 +10,6 @@ router.get('/api/getuser',  passport.authenticate('jwt', { session: false }), (r
   });
 });
 router.post('/api/user/update',  passport.authenticate('jwt', { session: false }), controller.updateUser);
+router.post('/api/getuser/byemail',  passport.authenticate('jwt', { session: false }), controller.getUserByEmail);
 
 module.exports = router;

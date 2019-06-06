@@ -75,7 +75,8 @@ const createAd = (req, res) => {
 
 const listing = (req, res) => {
   const schema = Joi.object().keys({
-    offset: Joi.number().required()
+    offset: Joi.number().required(),
+    searchText: Joi.string().allow([null, ''])
   }).options({
     stripUnknown: true
   });
@@ -84,6 +85,21 @@ const listing = (req, res) => {
     if (err) {
       return res.status(422).json(err.details[0].message);
     } else {
+      const where = {};
+      if (params.searchText) {
+        where['$or'] = [
+          {
+            pickup: {
+              [db.Sequelize.Op.iLike]: '%' + params.searchText + '%'
+            }
+          },
+          {
+            drop: {
+              [db.Sequelize.Op.iLike]: '%' + params.searchText + '%'
+            }
+          }
+        ];
+      }
       return db.Ads.findAll({
         include: [{
           model: db.Users,
@@ -102,6 +118,7 @@ const listing = (req, res) => {
         order: [
           ['createdAt', 'DESC']
         ],
+        where: where,
         offset: params.offset,
         limit: 20
       }).then(ads => {
