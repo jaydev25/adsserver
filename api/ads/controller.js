@@ -9,10 +9,11 @@ const createAd = (req, res) => {
     title: Joi.string().required(),
     pickup: Joi.string().required(),
     drop: Joi.string().required(),
-    description: Joi.string(),
-    catId: Joi.number(),
-    subcatId: Joi.number(),
-    images: Joi.array ()
+    description: Joi.string().required(),
+    catId: Joi.number().required(),
+    subcatId: Joi.number().required(),
+    amount: Joi.number().required(),
+    images: Joi.array().required()
   }).options({
     stripUnknown: true
   });
@@ -36,6 +37,7 @@ const createAd = (req, res) => {
           description: params.description,
           catId: params.catId,
           subcatId: params.subcatId,
+          amount: params.amount,
           classId: 1,
           createdBy: req.user.email,
           updatedBy: req.user.email
